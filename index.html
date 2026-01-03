@@ -25,6 +25,7 @@
         #timeline {
             height: calc(100vh - 30px);
             margin-top: 30px;
+            top:0px;
             position: relative;
             background: white;
         }
@@ -73,8 +74,8 @@
             transform: translateY(-50%);
         }
         .adv-circle {
-            width: 8px;
-            height: 8px;
+            width: 9px;
+            height: 9px;
             background: black;
             border-radius: 50%;
             position: absolute;
@@ -219,7 +220,6 @@
                     const totalHours = maxHours + bufferHours;
                     const totalVw = (totalHours / 2) * 100;
                     timeline.style.width = totalVw + 'vw';
-                    timeline.style.background = `repeating-linear-gradient(to right, transparent ${minorVw - 0.1}vw, rgba(0,0,0,0.2) 0.1vw), repeating-linear-gradient(to right, transparent ${majorVw - 0.2}vw, rgba(0,0,0,0.5) 0.2vw)`;
                     timebar.style.width = totalVw + 'vw';
                     
                     const greenLine = document.createElement('div');
