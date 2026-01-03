@@ -7,44 +7,133 @@
     <style>
         body {
             margin: 0;
-            overflow: hidden;
             font-family: Arial, sans-serif;
+        }
+        #timebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background: rgba(23, 201, 255, 0.9);
+            padding: 5px 10px;
+            font-size: 14px;
+            z-index: 10;
+            box-sizing: border-box;
         }
         #timeline {
             width: 10000vw;
-            height: 100vh;
-            overflow: auto;
+            height: calc(100vh - 30px);
+            margin-top: 30px;
             position: relative;
-            background: 
-                repeating-linear-gradient(to right, transparent 19.9vw, rgba(0,0,0,0.2) 0.1vw),
-                repeating-linear-gradient(to right, transparent 99.9vw, rgba(0,0,0,0.5) 0.1vw);
+            background: white;
         }
         #people {
             display: flex;
             flex-direction: column;
         }
+        .person {
+            position: relative;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+        }
+        .person-line {
+            position: absolute;
+            left: 100px;
+            top: 50%;
+            right: 0;
+            height: 1px;
+            background: black;
+            transform: translateY(-50%);
+        }
         .advancement {
             position: absolute;
-            top: 10px;
-            width: auto;
-            height: auto;
-            background-color: red;
-            border-radius: 5px;
-            padding: 2px 5px;
-            font-size: 12px;
-            color: white;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: blue;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .tooltip {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 1px solid black;
+            padding: 5px;
+            display: none;
             white-space: nowrap;
+            z-index: 10;
+            font-size: 12px;
+        }
+        .tooltip .name {
+            font-weight: bold;
+        }
+        .tooltip .desc {
+            margin-top: 2px;
+        }
+        .advancement:hover .tooltip {
+            display: block;
         }
     </style>
 </head>
 <body>
+    <div id="timebar"></div>
     <div id="timeline">
         <div id="people">
             <!-- People rows added here -->
         </div>
     </div>
     <script>
-        const startTime = new Date('2026-01-01T16:37:00-05:00');
+        const startTime = new Date('2026-01-01T16:30:00-05:00');
+
+        const timebar = document.getElementById('timebar');
+        const timeline = document.getElementById('timeline');
+        timeline.style.zIndex = '2';
+        document.addEventListener('mousemove', (e) => {
+            const vwPerPixel = 100 / window.innerWidth;
+            const vwPosition = (timeline.scrollLeft + e.clientX) * vwPerPixel;
+            const hours = (vwPosition / 100) * 2;
+            const time = new Date(startTime.getTime() + hours * 60 * 60 * 1000);
+            timebar.textContent = time.toLocaleString();
+        });
+
+        const hoursPerVw = 2 / 100; // hours per vw
+        const minorHours = 24 / 60; // 0.4 hours
+        const majorHours = 2; // hours
+        const minorVw = minorHours / hoursPerVw; // 20
+        const majorVw = majorHours / hoursPerVw; // 100
+
+        const barsDiv = document.createElement('div');
+        barsDiv.style.position = 'fixed';
+        barsDiv.style.top = '30px';
+        barsDiv.style.left = '0';
+        barsDiv.style.width = '100vw';
+        barsDiv.style.height = 'calc(100vh - 30px)';
+        barsDiv.style.pointerEvents = 'none';
+        barsDiv.style.zIndex = '1';
+        document.body.appendChild(barsDiv);
+
+        for (let pos = 0; pos < 10000; pos += minorVw) {
+            const bar = document.createElement('div');
+            bar.style.position = 'absolute';
+            bar.style.left = pos + 'vw';
+            bar.style.top = 0;
+            bar.style.height = '100%';
+            if (pos % majorVw === 0) {
+                bar.style.width = '2px';
+                bar.style.background = 'rgba(0,0,0,0.5)';
+            } else {
+                bar.style.width = '1px';
+                bar.style.background = 'rgba(0,0,0,0.2)';
+            }
+            barsDiv.appendChild(bar);
+        }
 
         function addPerson(name, advancements) {
             const peopleDiv = document.getElementById('people');
@@ -53,7 +142,11 @@
             personDiv.textContent = name;
             personDiv.style.position = 'relative';
             
-            advancements.forEach(adv => {
+            const personLine = document.createElement('div');
+            personLine.className = 'person-line';
+            personDiv.appendChild(personLine);
+            
+            advancements.forEach((adv, i) => {
                 const time = new Date(adv.timestamp);
                 const hours = (time - startTime) / (1000 * 60 * 60);
                 const position = (hours / 2) * 100; // 100vw per 2 hours
@@ -61,8 +154,12 @@
                 const eventDiv = document.createElement('div');
                 eventDiv.className = 'advancement';
                 eventDiv.style.left = position + 'vw';
-                eventDiv.textContent = adv.name;
-                eventDiv.title = adv.desc; // tooltip
+                
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.innerHTML = `<div class="name">${adv.name}</div><div class="desc">${adv.desc}</div>`;
+                eventDiv.appendChild(tooltip);
+                
                 personDiv.appendChild(eventDiv);
             });
             
@@ -95,6 +192,26 @@
                 Object.keys(people).forEach(name => {
                     addPerson(name, people[name]);
                 });
+                
+                const allAdv = Object.values(people).flat();
+                if (allAdv.length > 0) {
+                    const maxTime = Math.max(...allAdv.map(a => new Date(a.timestamp).getTime()));
+                    const maxHours = (maxTime - startTime.getTime()) / (1000 * 60 * 60);
+                    const bufferHours = 24 / 60;
+                    const totalHours = maxHours + bufferHours;
+                    const totalVw = (totalHours / 2) * 100;
+                    timeline.style.width = totalVw + 'vw';
+                    
+                    const greenLine = document.createElement('div');
+                    greenLine.style.position = 'absolute';
+                    greenLine.style.left = ((maxHours / 2) * 100) + 'vw';
+                    greenLine.style.top = 0;
+                    greenLine.style.width = '5px';
+                    greenLine.style.height = '100%';
+                    greenLine.style.background = 'green';
+                    greenLine.style.zIndex = '3';
+                    timeline.appendChild(greenLine);
+                }
             })
             .catch(error => console.error('Error loading advancements:', error));
     </script>
