@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #timeline {
+            width: 10000vw;
+            height: 100vh;
+            overflow: auto;
+            position: relative;
+            background: 
+                repeating-linear-gradient(to right, transparent 19.9vw, rgba(0,0,0,0.2) 0.1vw),
+                repeating-linear-gradient(to right, transparent 99.9vw, rgba(0,0,0,0.5) 0.1vw);
+        }
+        #people {
+            display: flex;
+            flex-direction: column;
+        }
+        .person {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="timeline">
+        <div id="people">
+            <!-- People rows added here -->
+        </div>
+    </div>
+    <script>
+        const startTime = new Date('2026-01-01T16:37:00-05:00');
+
+        function addPerson(name, advancements) {
+            const peopleDiv = document.getElementById('people');
+            const personDiv = document.createElement('div');
+            personDiv.className = 'person';
+            personDiv.textContent = name;
+            personDiv.style.position = 'relative';
+            
+            advancements.forEach(msg => {
+                const time = new Date(msg.timestamp);
+                const hours = (time - startTime) / (1000 * 60 * 60);
+                const position = (hours / 2) * 100; // 100vw per 2 hours
+                
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'advancement';
+                eventDiv.style.position = 'absolute';
+                eventDiv.style.left = position + 'vw';
+                eventDiv.style.top = '10px';
+                eventDiv.style.width = '10px';
+                eventDiv.style.height = '10px';
+                eventDiv.style.backgroundColor = 'red';
+                eventDiv.style.borderRadius = '50%';
+                eventDiv.title = msg.embeds[0].description; // tooltip
+                personDiv.appendChild(eventDiv);
+            });
+            
+            peopleDiv.appendChild(personDiv);
+        }
+
+        fetch('2026_advancements.json')
+            .then(response => response.json())
+            .then(data => {
+                const people = {};
+                data.messages.forEach(msg => {
+                    const name = msg.author.name;
+                    if (!people[name]) people[name] = [];
+                    people[name].push(msg);
+                });
+                Object.keys(people).forEach(name => {
+                    addPerson(name, people[name]);
+                });
+            })
+            .catch(error => console.error('Error loading advancements:', error));
+    </script>
+</body>
+</html>
