@@ -34,11 +34,11 @@
         }
         .person {
             position: relative;
-            height: 40px;
+            height: 20px;
             display: flex;
             align-items: flex-start;
             padding-left: 0;
-            padding-top: 5px;
+            padding-top: 0;
         }
         .person-name {
             position: sticky;
@@ -46,6 +46,7 @@
             width: 90px;
             z-index: 4;
             font-weight: bold;
+            margin-top: -2px;
         }
         .person-line {
             position: absolute;
@@ -60,10 +61,9 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 8px;
-            height: 8px;
+            width: 1px;
+            height: 10px;
             background: blue;
-            border-radius: 50%;
             cursor: pointer;
         }
         .tooltip {
@@ -76,7 +76,7 @@
             padding: 5px;
             display: none;
             white-space: nowrap;
-            z-index: 10;
+            z-index: 500;
             font-size: 12px;
         }
         .tooltip .name {
@@ -122,9 +122,8 @@
         barsDiv.style.top = 0;
         barsDiv.style.left = 0;
         barsDiv.style.width = '100%';
-        barsDiv.style.height = '100%';
         barsDiv.style.pointerEvents = 'none';
-        barsDiv.style.zIndex = '1';
+        barsDiv.style.zIndex = '0';
         timeline.appendChild(barsDiv);
 
         for (let pos = 0; pos < 10000; pos += minorVw) {
@@ -203,6 +202,9 @@
                 Object.keys(people).forEach(name => {
                     addPerson(name, people[name]);
                 });
+                
+                const numPeople = Object.keys(people).length;
+                barsDiv.style.height = (numPeople * 20) + 'px';
                 
                 const allAdv = Object.values(people).flat();
                 if (allAdv.length > 0) {
