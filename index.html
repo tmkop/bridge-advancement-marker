@@ -34,10 +34,18 @@
         }
         .person {
             position: relative;
-            height: 60px;
+            height: 40px;
             display: flex;
-            align-items: center;
-            padding-left: 10px;
+            align-items: flex-start;
+            padding-left: 0;
+            padding-top: 5px;
+        }
+        .person-name {
+            position: sticky;
+            left: 10px;
+            width: 90px;
+            z-index: 4;
+            font-weight: bold;
         }
         .person-line {
             position: absolute;
@@ -110,14 +118,14 @@
         const majorVw = majorHours / hoursPerVw; // 100
 
         const barsDiv = document.createElement('div');
-        barsDiv.style.position = 'fixed';
-        barsDiv.style.top = '30px';
-        barsDiv.style.left = '0';
-        barsDiv.style.width = '100vw';
-        barsDiv.style.height = 'calc(100vh - 30px)';
+        barsDiv.style.position = 'absolute';
+        barsDiv.style.top = 0;
+        barsDiv.style.left = 0;
+        barsDiv.style.width = '100%';
+        barsDiv.style.height = '100%';
         barsDiv.style.pointerEvents = 'none';
         barsDiv.style.zIndex = '1';
-        document.body.appendChild(barsDiv);
+        timeline.appendChild(barsDiv);
 
         for (let pos = 0; pos < 10000; pos += minorVw) {
             const bar = document.createElement('div');
@@ -139,8 +147,11 @@
             const peopleDiv = document.getElementById('people');
             const personDiv = document.createElement('div');
             personDiv.className = 'person';
-            personDiv.textContent = name;
-            personDiv.style.position = 'relative';
+            
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'person-name';
+            nameDiv.textContent = name;
+            personDiv.appendChild(nameDiv);
             
             const personLine = document.createElement('div');
             personLine.className = 'person-line';
