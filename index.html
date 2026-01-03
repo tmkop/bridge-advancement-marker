@@ -22,7 +22,6 @@
             box-sizing: border-box;
         }
         #timeline {
-            width: 10000vw;
             height: calc(100vh - 30px);
             margin-top: 30px;
             position: relative;
@@ -43,10 +42,10 @@
         .person-name {
             position: sticky;
             left: 10px;
-            width: 90px;
+            width: 150px;
             z-index: 4;
             font-weight: bold;
-            margin-top: -2px;
+            background:white;
         }
         .person-line {
             position: absolute;
@@ -61,7 +60,7 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 1px;
+            width: 2px;
             height: 10px;
             background: blue;
             cursor: pointer;
@@ -111,11 +110,12 @@
             timebar.textContent = time.toLocaleString();
         });
 
-        const hoursPerVw = 2 / 100; // hours per vw
-        const minorHours = 24 / 60; // 0.4 hours
-        const majorHours = 2; // hours
-        const minorVw = minorHours / hoursPerVw; // 20
-        const majorVw = majorHours / hoursPerVw; // 100
+        const minutesInGameDay = 24; //24 minutes in a game day
+        const hoursPerVw = 1 / 100; // hours per vw
+        const minorHours = minutesInGameDay / 60 * 1; //1 game day
+        const majorHours = minutesInGameDay / 60 * 5; //5 game days
+        const minorVw = minorHours / hoursPerVw; 
+        const majorVw = majorHours / hoursPerVw; 
 
         const barsDiv = document.createElement('div');
         barsDiv.style.position = 'absolute';
@@ -126,21 +126,6 @@
         barsDiv.style.zIndex = '0';
         timeline.appendChild(barsDiv);
 
-        for (let pos = 0; pos < 10000; pos += minorVw) {
-            const bar = document.createElement('div');
-            bar.style.position = 'absolute';
-            bar.style.left = pos + 'vw';
-            bar.style.top = 0;
-            bar.style.height = '100%';
-            if (pos % majorVw === 0) {
-                bar.style.width = '2px';
-                bar.style.background = 'rgba(0,0,0,0.5)';
-            } else {
-                bar.style.width = '1px';
-                bar.style.background = 'rgba(0,0,0,0.2)';
-            }
-            barsDiv.appendChild(bar);
-        }
 
         function addPerson(name, advancements) {
             const peopleDiv = document.getElementById('people');
@@ -214,6 +199,7 @@
                     const totalHours = maxHours + bufferHours;
                     const totalVw = (totalHours / 2) * 100;
                     timeline.style.width = totalVw + 'vw';
+                    timebar.style.width = totalVw + 'vw';
                     
                     const greenLine = document.createElement('div');
                     greenLine.style.position = 'absolute';
@@ -224,7 +210,25 @@
                     greenLine.style.background = 'green';
                     greenLine.style.zIndex = '3';
                     timeline.appendChild(greenLine);
+                    
+                    for (let pos = 0; pos < totalVw; pos += minorVw) {
+                        const bar = document.createElement('div');
+                        bar.style.position = 'absolute';
+                        bar.style.left = pos + 'vw';
+                        bar.style.top = 0;
+                        bar.style.height = '100%';
+                        if (pos % majorVw === 0) {
+                            bar.style.width = '2px';
+                            bar.style.background = 'rgba(0,0,0,0.5)';
+                        } else {
+                            bar.style.width = '1px';
+                            bar.style.background = 'rgba(0,0,0,0.2)';
+                        }
+                        barsDiv.appendChild(bar);
+                    }
                 }
+
+                
             })
             .catch(error => console.error('Error loading advancements:', error));
     </script>
