@@ -28,6 +28,7 @@
             background: white;
         }
         #people {
+            position:relative;
             display: flex;
             flex-direction: column;
         }
@@ -117,16 +118,12 @@
         const timeline = document.getElementById('timeline');
         timeline.style.zIndex = '2';
         document.addEventListener('mousemove', (e) => {
-            if (e.target.closest('#timeline')) {
-                const vwPerPixel = 100 / window.innerWidth;
-                const vwPosition = (timeline.scrollLeft + e.clientX) * vwPerPixel;
-                const hours = (vwPosition / 100) * 2;
-                const time = new Date(startTime.getTime() + hours * 60 * 60 * 1000);
-                timebar.textContent = time.toLocaleString();
-                timebar.style.display = 'block';
-            } else {
-                timebar.style.display = 'none';
-            }
+            const vwPerPixel = 100 / window.innerWidth;
+            const vwPosition = (timeline.scrollLeft + e.clientX) * vwPerPixel;
+            const hours = (vwPosition / 100) * 2;
+            const time = new Date(startTime.getTime() + hours * 60 * 60 * 1000);
+            timebar.textContent = time.toLocaleString();
+            timebar.style.display = 'block';
         });
 
         const minutesInGameDay = 24; //24 minutes in a game day
@@ -134,16 +131,7 @@
         const minorHours = minutesInGameDay / 60 * 1; //1 game day
         const majorHours = minutesInGameDay / 60 * 5; //5 game days
         const minorVw = minorHours / hoursPerVw; 
-        const majorVw = majorHours / hoursPerVw; 
-
-        const barsDiv = document.createElement('div');
-        barsDiv.style.position = 'absolute';
-        barsDiv.style.top = 0;
-        barsDiv.style.left = 0;
-        barsDiv.style.width = '100%';
-        barsDiv.style.pointerEvents = 'none';
-        barsDiv.style.zIndex = '0';
-        timeline.appendChild(barsDiv);
+        const majorVw = majorHours / hoursPerVw;
 
 
         function addPerson(name, advancements) {
@@ -221,7 +209,6 @@
                 });
                 
                 const numPeople = Object.keys(people).length;
-                barsDiv.style.height = (numPeople * 20) + 'px';
                 
                 const allAdv = Object.values(people).flat();
                 if (allAdv.length > 0) {
@@ -231,17 +218,18 @@
                     const totalHours = maxHours + bufferHours;
                     const totalVw = (totalHours / 2) * 100;
                     timeline.style.width = totalVw + 'vw';
+                    timeline.style.background = `repeating-linear-gradient(to right, transparent ${minorVw - 0.1}vw, rgba(0,0,0,0.2) 0.1vw), repeating-linear-gradient(to right, transparent ${majorVw - 0.2}vw, rgba(0,0,0,0.5) 0.2vw)`;
                     timebar.style.width = totalVw + 'vw';
                     
                     const greenLine = document.createElement('div');
                     greenLine.style.position = 'absolute';
                     greenLine.style.left = ((maxHours / 2) * 100) + 'vw';
                     greenLine.style.top = 0;
-                    greenLine.style.width = '5px';
+                    greenLine.style.width = '2px';
                     greenLine.style.height = '100%';
                     greenLine.style.background = 'green';
                     greenLine.style.zIndex = '3';
-                    barsDiv.appendChild(greenLine);
+                    timeline.appendChild(greenLine);
                     
                     for (let pos = 0; pos < totalVw; pos += minorVw) {
                         const bar = document.createElement('div');
