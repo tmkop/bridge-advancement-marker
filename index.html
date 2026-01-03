@@ -10,16 +10,16 @@
             font-family: Arial, sans-serif;
         }
         #timebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+            position: absolute;
+            width: auto;
             height: 30px;
             background: rgba(23, 201, 255, 0.9);
             padding: 5px 10px;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: bold;
             z-index: 10;
             box-sizing: border-box;
+            display: none;
         }
         #timeline {
             height: calc(100vh - 30px);
@@ -41,15 +41,15 @@
         }
         .person-name {
             position: sticky;
-            left: 10px;
-            width: 150px;
+            padding-left: 10px;
+            width: fit-content;
             z-index: 4;
             font-weight: bold;
             background:white;
         }
         .person-line {
             position: absolute;
-            left: 100px;
+            left: 0px;
             top: 50%;
             right: 0;
             height: 1px;
@@ -60,10 +60,24 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 2px;
+            cursor: pointer;
+        }
+        .adv-tic {
+            width: 1px;
             height: 10px;
             background: blue;
-            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .adv-circle {
+            width: 8px;
+            height: 8px;
+            background: blue;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
         .tooltip {
             position: absolute;
@@ -75,7 +89,7 @@
             padding: 5px;
             display: none;
             white-space: nowrap;
-            z-index: 500;
+            z-index: 20;
             font-size: 12px;
         }
         .tooltip .name {
@@ -103,11 +117,18 @@
         const timeline = document.getElementById('timeline');
         timeline.style.zIndex = '2';
         document.addEventListener('mousemove', (e) => {
-            const vwPerPixel = 100 / window.innerWidth;
-            const vwPosition = (timeline.scrollLeft + e.clientX) * vwPerPixel;
-            const hours = (vwPosition / 100) * 2;
-            const time = new Date(startTime.getTime() + hours * 60 * 60 * 1000);
-            timebar.textContent = time.toLocaleString();
+            if (e.target.closest('#timeline')) {
+                const vwPerPixel = 100 / window.innerWidth;
+                const vwPosition = (timeline.scrollLeft + e.clientX) * vwPerPixel;
+                const hours = (vwPosition / 100) * 2;
+                const time = new Date(startTime.getTime() + hours * 60 * 60 * 1000);
+                timebar.textContent = time.toLocaleString();
+                timebar.style.left = e.clientX + 'px';
+                timebar.style.top = (e.clientY - 40) + 'px';
+                timebar.style.display = 'block';
+            } else {
+                timebar.style.display = 'none';
+            }
         });
 
         const minutesInGameDay = 24; //24 minutes in a game day
@@ -149,6 +170,19 @@
                 const eventDiv = document.createElement('div');
                 eventDiv.className = 'advancement';
                 eventDiv.style.left = position + 'vw';
+                
+                const tic = document.createElement('div');
+                tic.className = 'adv-tic';
+                eventDiv.appendChild(tic);
+                
+                const circle = document.createElement('div');
+                circle.className = 'adv-circle';
+                if (i % 2 === 0) {
+                    circle.style.top = '-6px';
+                } else {
+                    circle.style.bottom = '-6px';
+                }
+                eventDiv.appendChild(circle);
                 
                 const tooltip = document.createElement('div');
                 tooltip.className = 'tooltip';
@@ -209,7 +243,7 @@
                     greenLine.style.height = '100%';
                     greenLine.style.background = 'green';
                     greenLine.style.zIndex = '3';
-                    timeline.appendChild(greenLine);
+                    barsDiv.appendChild(greenLine);
                     
                     for (let pos = 0; pos < totalVw; pos += minorVw) {
                         const bar = document.createElement('div');
